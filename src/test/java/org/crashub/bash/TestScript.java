@@ -80,6 +80,42 @@ public class TestScript extends TestCase {
     new Script("echo `cat foo.txt`").prettyPrint();
   }
 
+  public void testDOT() throws Exception {
+    final AtomicInteger count = new AtomicInteger();
+    Object ret = new Shell().command("cd", new BaseContext.Command() {
+      @Override
+      public Object execute(BaseContext context, Scope bindings, List<String> parameters, InputStream standardInput, OutputStream standardOutput) {
+        count.incrementAndGet();
+        return parameters.get(0);
+      }
+    }).eval("cd .");
+    assertEquals(".", ret);
+  }
+
+  public void testDOTDOT() throws Exception {
+    final AtomicInteger count = new AtomicInteger();
+    Object ret = new Shell().command("cd", new BaseContext.Command() {
+      @Override
+      public Object execute(BaseContext context, Scope bindings, List<String> parameters, InputStream standardInput, OutputStream standardOutput) {
+        count.incrementAndGet();
+        return parameters.get(0);
+      }
+    }).eval("cd ..");
+    assertEquals("..", ret);
+  }
+
+  public void testTILDE() throws Exception {
+    final AtomicInteger count = new AtomicInteger();
+    Object ret = new Shell().command("cd", new BaseContext.Command() {
+      @Override
+      public Object execute(BaseContext context, Scope bindings, List<String> parameters, InputStream standardInput, OutputStream standardOutput) {
+        count.incrementAndGet();
+        return parameters.get(0);
+      }
+    }).eval("cd ~");
+    assertEquals("~", ret);
+  }
+
   public void testCase() throws Exception {
     System.out.println("Case:");
     new Script("case \"$1\" in\n" +

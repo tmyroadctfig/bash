@@ -1,5 +1,16 @@
 package org.crashub.bash;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
@@ -21,17 +32,6 @@ import org.crashub.bash.spi.Context;
 import org.crashub.bash.spi.Scope;
 import org.gentoo.libbash.java_libbashLexer;
 import org.gentoo.libbash.java_libbashParser;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * @author Julien Viet
@@ -259,6 +259,15 @@ public class Script {
         case java_libbashParser.MINUS:
           // Shoud we handle options there ?
           o = "-";
+          break;
+        case java_libbashParser.DOT:
+          o = ".";
+          break;
+        case java_libbashParser.DOTDOT:
+          o = "..";
+          break;
+        case java_libbashParser.TILDE:
+          o = "~";
           break;
         case java_libbashParser.VAR_REF:
           o = Script._VAR_REF(tree);
