@@ -116,6 +116,18 @@ public class TestScript extends TestCase {
     assertEquals("~", ret);
   }
 
+  public void testNUMBER() throws Exception {
+    final AtomicInteger count = new AtomicInteger();
+    Object ret = new Shell().command("echo", new BaseContext.Command() {
+      @Override
+      public Object execute(BaseContext context, Scope bindings, List<String> parameters, InputStream standardInput, OutputStream standardOutput) {
+        count.incrementAndGet();
+        return parameters.get(0);
+      }
+    }).eval("echo 123");
+    assertEquals("123", ret);
+  }
+
   public void testCase() throws Exception {
     System.out.println("Case:");
     new Script("case \"$1\" in\n" +
