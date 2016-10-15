@@ -4,6 +4,7 @@ import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import org.antlr.runtime.RecognitionException;
 import org.crashub.bash.spi.BaseContext;
+import org.crashub.bash.spi.CommandNotFoundException;
 import org.crashub.bash.spi.Scope;
 
 import java.io.InputStream;
@@ -116,6 +117,18 @@ public class TestScript extends TestCase {
     assertEquals("~", ret);
   }
 
+  public void testSLASH() throws Exception {
+    final AtomicInteger count = new AtomicInteger();
+    Object ret = new Shell().command("cd", new BaseContext.Command() {
+      @Override
+      public Object execute(BaseContext context, Scope bindings, List<String> parameters, InputStream standardInput, OutputStream standardOutput) {
+        count.incrementAndGet();
+        return parameters.get(0);
+      }
+    }).eval("cd /");
+    assertEquals("/", ret);
+  }
+
   public void testNUMBER() throws Exception {
     final AtomicInteger count = new AtomicInteger();
     Object ret = new Shell().command("echo", new BaseContext.Command() {
@@ -141,6 +154,17 @@ public class TestScript extends TestCase {
     shell.eval("i=3\n");
     Object i = shell.getBinding("i");
     assertEquals("3", i);
+  }
+
+  public void testUnknownCommand() throws Exception {
+    Shell shell = new Shell();
+    try {
+      shell.eval("cmd");
+      fail("Expected exception");
+
+    } catch (CommandNotFoundException e) {
+      assertEquals("cmd", e.getCommandName());
+    }
   }
 
   public void testUnsetVariableEvaluation() throws Exception {

@@ -314,6 +314,9 @@ public class Script
                 case java_libbashParser.TILDE:
                     o = "~";
                     break;
+                case java_libbashParser.SLASH:
+                    o = "/";
+                    break;
                 case java_libbashParser.VAR_REF:
                     o = Script._VAR_REF(tree);
                     break;
