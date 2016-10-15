@@ -3,10 +3,12 @@ package org.crashub.bash;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import org.antlr.runtime.RecognitionException;
+import org.crashub.bash.ir.REDIR;
 import org.crashub.bash.spi.BaseContext;
 import org.crashub.bash.spi.CommandNotFoundException;
 import org.crashub.bash.spi.Scope;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -74,6 +76,43 @@ public class TestScript extends TestCase {
     list.clear();
     shell.eval("foo | bar | juu");
     assertEquals(Arrays.asList("foo", "bar", "juu"), list);
+  }
+
+  public void testRedirect() throws Exception {
+    final AtomicInteger count = new AtomicInteger();
+    Object ret = new Shell().command("echo", new BaseContext.Command() {
+      public Object execute(BaseContext context, Scope bindings, List<String> parameters, InputStream standardInput, OutputStream standardOutput) {
+        try {
+          standardOutput.write(parameters.get(0).getBytes());
+          count.incrementAndGet();
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+        return 1;
+      }
+    }).eval("echo > /tmp/file");
+    assertTrue(ret instanceof REDIR);
+    assertEquals("/tmp/file", ((REDIR) ret).getRedirect());
+    assertEquals(1, count.get());
+  }
+
+  public void testRedirectAppend() throws Exception {
+    final AtomicInteger count = new AtomicInteger();
+    Object ret = new Shell().command("echo", new BaseContext.Command() {
+      public Object execute(BaseContext context, Scope bindings, List<String> parameters, InputStream standardInput, OutputStream standardOutput) {
+        try {
+          standardOutput.write(parameters.get(0).getBytes());
+          count.incrementAndGet();
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+        return 1;
+      }
+    }).eval("echo >> /tmp/file");
+    assertTrue(ret instanceof REDIR);
+    assertEquals("/tmp/file", ((REDIR) ret).getRedirect());
+    assertTrue(((REDIR) ret).isAppend());
+    assertEquals(1, count.get());
   }
 
   public void testBackquotes() throws Exception {

@@ -25,6 +25,7 @@ import org.crashub.bash.ir.IF_STATEMENT;
 import org.crashub.bash.ir.LIST;
 import org.crashub.bash.ir.Node;
 import org.crashub.bash.ir.PIPE;
+import org.crashub.bash.ir.REDIR;
 import org.crashub.bash.ir.STRING;
 import org.crashub.bash.ir.SetLocal;
 import org.crashub.bash.ir.WHILE;
@@ -443,6 +444,27 @@ public class Script
                 return _COMPOUND_COND(child);
             case java_libbashParser.FUNCTION:
                 return _FUNCTION(child);
+            case java_libbashParser.REDIR:
+            {
+                STRING command;
+                List<STRING> parameters;
+                command = _STRING(tree.getChild(1));
+                int childCount = tree.getChildCount();
+                if (childCount > 1)
+                {
+                    parameters = new ArrayList<STRING>(childCount - 1);
+                    for (int index = 1; index < childCount; index++)
+                    {
+                        parameters.add(_STRING(tree.getChild(index)));
+                    }
+                }
+                else
+                {
+                    parameters = Collections.emptyList();
+                }
+
+                return _REDIR(child, new Command(command, parameters));
+            }
             default:
                 throw unsupported(child);
         }
@@ -575,6 +597,29 @@ public class Script
         Node last = _COMMAND(tree.getChild(1));
         ret.add(last);
         return ret;
+    }
+
+    private REDIR _REDIR(Tree tree, Node command)
+    {
+        assertTree(tree, java_libbashParser.REDIR);
+
+        boolean append;
+        Tree operation = tree.getChild(0);
+        if (operation.getType() == java_libbashParser.GREATER_THAN)
+        {
+            append = false;
+        }
+        else if (operation.getType() == java_libbashParser.OP && ">>".equals(operation.getText()))
+        {
+            append = true;
+        }
+        else
+        {
+            throw unsupported(operation);
+        }
+
+        STRING redir = _STRING(tree.getChild(1));
+        return new REDIR(command, redir, append);
     }
 
     public void prettyPrint()
